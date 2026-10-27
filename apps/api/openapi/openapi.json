@@ -1,0 +1,177 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Shifu.me API",
+    "version": "0.1.0",
+    "description": "Routes réellement implémentées par le starter"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Credentials": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 24
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "{status: ok}"
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "summary": "Inscription",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Compte et JWT"
+          },
+          "400": {
+            "description": "Entrée invalide"
+          },
+          "401": {
+            "description": "Refusé"
+          },
+          "409": {
+            "description": "Pseudo occupé"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Connexion",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Compte et JWT"
+          },
+          "400": {
+            "description": "Entrée invalide"
+          },
+          "401": {
+            "description": "Refusé"
+          },
+          "409": {
+            "description": "Pseudo occupé"
+          }
+        }
+      }
+    },
+    "/api/users/leaderboard": {
+      "get": {
+        "summary": "Top 50 Elo",
+        "responses": {
+          "200": {
+            "description": "Liste"
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "summary": "Mon profil",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profil"
+          },
+          "401": {
+            "description": "JWT manquant"
+          }
+        }
+      },
+      "put": {
+        "summary": "Éditer pseudo ou avatar",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "avatar": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profil modifié"
+          },
+          "400": {
+            "description": "Entrée invalide"
+          },
+          "409": {
+            "description": "Pseudo occupé"
+          }
+        }
+      }
+    }
+  }
+}

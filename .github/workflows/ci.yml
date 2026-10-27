@@ -1,0 +1,28 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Installer pnpm et Node.js 24
+        uses: pnpm/setup@v3
+        with:
+          runtime: node@24
+          install: false
+          cache: true
+      - name: Installer les dépendances avec verrouillage
+        run: pnpm install --frozen-lockfile
+      - name: Lint Biome
+        run: pnpm lint
+      - name: Build (génère également les routes TanStack)
+        run: pnpm build
+      - name: Vérification TypeScript
+        run: pnpm typecheck
+      - name: Tests Jest
+        run: pnpm test
