@@ -2,27 +2,27 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, dev]
 permissions:
   contents: read
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - name: Installer pnpm et Node.js 24
         uses: pnpm/setup@v3
         with:
-          runtime: node@24
-          install: false
-          cache: true
+          runtime: node@24 # Utiliser Node.js 24
+          install: false # Ne pas installer automatiquement les dépendances, nous le faisons manuellement après
+          cache: true # Activer la mise en cache des dépendances pour accélérer les builds futurs
       - name: Installer les dépendances avec verrouillage
         run: pnpm install --frozen-lockfile
       - name: Lint Biome
         run: pnpm lint
-      - name: Build (génère également les routes TanStack)
+      - name: Build et vérification TypeScript des trois packages
         run: pnpm build
-      - name: Vérification TypeScript
-        run: pnpm typecheck
-      - name: Tests Jest
+      - name: Installer Chromium pour les tests frontend
+        run: pnpm --filter @shifu/web exec playwright install --with-deps chromium
+      - name: Tests API et frontend sans MongoDB
         run: pnpm test
