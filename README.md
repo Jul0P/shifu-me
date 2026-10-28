@@ -48,22 +48,50 @@ Copier les fichiers d’environnement uniquement s’ils n’existent pas déjà
 
 ## MongoDB local
 
-L’API utilise le serveur existant sur `127.0.0.1:27017`, la base `shifu_me` et un replica set à un membre nommé `rs0`. Les transactions multi-documents ne fonctionnent pas sur un serveur standalone.
+Ces étapes concernent Windows avec **MongoDB Community Server installé comme service**, sur le port `27017`. Compass permet de s’y connecter et d’ouvrir un shell. Avec **MongoDB Atlas**, passer directement à [Vercel + MongoDB Atlas](#vercel--mongodb-atlas) : cette configuration locale est inutile.
 
-Dans la configuration du service MongoDB existant, conserver les paramètres de stockage et de réseau et configurer :
+**1. Renseigner l’URI dans `apps/api/.env` :**
+
+```dotenv
+MONGODB_URI=mongodb://127.0.0.1:27017/shifu_me
+```
+
+**2. Configurer le serveur MongoDB :** ouvrir `C:\Program Files\MongoDB\Server\<version>\bin\mongod.cfg` avec un éditeur lancé **en tant qu’administrateur** (remplacer `<version>` par la version installée, par exemple `8.2`). Si le fichier est ailleurs, ouvrir `services.msc` → **MongoDB** → **Propriétés** : son chemin apparaît après `--config` dans le chemin de l’exécutable.
+
+Ajouter ce bloc dans le fichier, au même niveau que `storage` et `net`. Conserver le reste du fichier et les deux espaces devant `replSetName`. Si la section `replication` existe déjà, la compléter sans la dupliquer :
 
 ```yaml
 replication:
   replSetName: rs0
 ```
 
-Après redémarrage de ce service, se connecter avec `mongosh "mongodb://127.0.0.1:27017/?directConnection=true"` et consulter `rs.status()`. Uniquement si le replica set n’est pas encore initialisé, lancer une fois :
+**3. Redémarrer le service :** enregistrer le fichier, ouvrir **Services** depuis le menu Démarrer (ou `services.msc`), puis clic droit sur **MongoDB** → **Redémarrer**. Windows peut demander les droits administrateur.
 
-```javascript
-rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: '127.0.0.1:27017' }] });
+**4. Initialiser le replica set dans Compass (obligatoire à la première installation) :** le bloc dans le fichier `cfg` active le mode replica set, mais ne l’initialise pas. Après le redémarrage, une connexion habituelle peut échouer car aucun primaire n’est encore disponible. Dans Compass, créer une connexion avec cette URI pour joindre directement le serveur :
+
+```text
+mongodb://127.0.0.1:27017/?directConnection=true
 ```
 
-Ne pas réinitialiser un replica set existant ni supprimer de base. L’URI locale peut être `mongodb://127.0.0.1:27017/shifu_me?replicaSet=rs0`. L’API prépare automatiquement les collections, les index et la coordination du lobby ; aucune importation Compass n’est nécessaire. `/api/ready` vérifie la préparation et la prise en charge des transactions, contrairement à `/api/health`.
+Une fois connecté, cliquer sur **>_ Open MongoDB shell**. Pour une installation neuve, copier cette commande dans le shell et appuyer sur Entrée. Elle initialise le replica set **une seule fois** :
+
+```text
+rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: '127.0.0.1:27017' }] })
+```
+
+Attendre quelques secondes, puis saisir cette commande pour vérifier le résultat :
+
+```text
+rs.status()
+```
+
+Le résultat doit indiquer `set: 'rs0'` et un membre `stateStr: 'PRIMARY'`.
+
+**Si MongoDB a déjà été configuré en replica set**, commencer directement par `rs.status()` : s’il indique `rs0` et `PRIMARY`, cette étape est déjà terminée. S’il renvoie `NotYetInitialized`, exécuter la commande d’initialisation ci-dessus. L’initialisation est conservée après les redémarrages : ne pas relancer `rs.initiate(...)` à chaque démarrage, ni réinitialiser un replica set existant.
+
+**5. Lancer Shifu.me :** exécuter `pnpm dev` à la racine du projet, puis ouvrir <http://localhost:3000/api/ready>. La réponse attendue est `{"status":"ready","transactions":true}`. L’API prépare automatiquement la base `shifu_me`, ses collections et ses index : rien à créer ni à importer dans Compass. `/api/health` vérifie seulement que l’API répond, même sans MongoDB.
+
+Le replica set permet les transactions nécessaires au jeu. Il n’est pas nécessaire à la création automatique d’une base et, avec un seul membre local, n’apporte aucune redondance.
 
 ## Scripts
 
@@ -174,11 +202,14 @@ Avant une intégration stable, vérifier `pnpm check` et la CI distante. Aucun p
 
 ## Vercel + MongoDB Atlas
 
+**Atlas gère la réplication du déploiement MongoDB.** Aucun fichier `mongod.cfg` à modifier, aucune commande `rs.initiate()` à lancer et aucun service MongoDB local à redémarrer pour ce déploiement. Vercel héberge les applications ; Atlas héberge la base.
+
 Créer deux projets Vercel reliés au même dépôt, root directories `apps/web` (preset Vite) et `apps/api` (Express). Autoriser l’accès au package workspace `packages/shared` depuis chacun. Conserver l’installation pnpm avec lockfile et Node 24 ; vérifier la compatibilité effective du runtime et de l’offre choisie.
 
 - **Web** : définir `VITE_API_URL` avec l’origine HTTPS de l’API avant le build. `apps/web/vercel.json` réécrit les URLs SPA vers `index.html`.
 - **API** : définir `NODE_ENV=production`, `MONGODB_URI` Atlas, `JWT_SECRET` aléatoire, `JWT_EXPIRES_IN` et `FRONTEND_URL` avec l’origine exacte du web. Les secrets ne vont jamais dans `VITE_*`. `src/index.ts` exporte Express sans appeler `listen()`.
 - **Atlas** : configurer un utilisateur dédié, ses permissions sur la base et les accès réseau compatibles avec l’hébergement. La base est externe : **pas de Docker, pas de MongoDB dans Vercel**.
+- **Connexion Atlas** : copier l’URI fournie dans **Connect → Drivers**, renseigner les identifiants et cibler la base `shifu_me`. La placer dans `MONGODB_URI` du projet API sur Vercel, puis déployer. Conserver les options fournies par Atlas, sans ajouter `replicaSet=rs0`. Vérifier `/api/ready` sur l’API déployée ; l’application prépare automatiquement les collections et les index.
 - **Recette preview** : vérifier health/ready, Swagger, CORS depuis le web, rafraîchissement d’une route privée, restauration de session, matchmaking, salle et finalisation d’un match avec historique/Elo.
 
 Les limiteurs en mémoire ne sont pas distribués entre instances Vercel. Le déploiement, les restrictions de collaboration des offres et les conditions réelles de charge doivent être vérifiés dans l’environnement cible ; les tests locaux ne les certifient pas.
