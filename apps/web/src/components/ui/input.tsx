@@ -1,11 +1,6 @@
-import type * as React from 'react';
+import type { ComponentProps } from 'react';
 import { cn } from '@/lib/utils';
-export function Input({ className, ...props }: React.ComponentProps<'input'>) {
-  return (
-    <input
-      data-slot="input"
-      className={cn('h-11 w-full rounded-lg border-2 border-black bg-white px-3 text-sm outline-offset-2', className)}
-      {...props}
-    />
-  );
+
+export function Input({ className, ...props }: ComponentProps<'input'>) {
+  return <input className={cn('arcade-chip min-h-12 w-full bg-white px-3 py-2 font-bold focus:bg-yellow-50 disabled:opacity-50', className)} {...props} />;
 }
