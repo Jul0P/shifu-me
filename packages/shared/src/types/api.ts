@@ -1,23 +1,6 @@
-export type ApiErrorBody = {
-  error: {
-    code: string;
-    message: string;
-  };
-};
-export type PublicUser = {
-  id: string;
-  username: string;
-  avatar: string;
-  elo: number;
-  stats: {
-    wins: number;
-    losses: number;
-  };
-};
-export type AuthResponse = {
-  user: PublicUser;
-  token: string;
-};
-export type HealthResponse = {
-  status: 'ok';
-};
+import type { z } from 'zod';
+import type { authResponseSchema, publicUserSchema } from '../schemas/api';
+
+export type PublicUser = z.infer<typeof publicUserSchema>;
+
+export type AuthResponse = z.infer<typeof authResponseSchema>;

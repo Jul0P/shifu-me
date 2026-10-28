@@ -8,4 +8,12 @@ export const GAME_CONFIG = {
   MIN_ELO: 0,
   MATCHMAKING_POLL_MS: 1_000,
   GAME_POLL_MS: 1_500,
+  ROUND_REVEAL_MS: 2_600,
+  QUEUE_LEASE_MS: 30_000,
+  ROOM_TTL_MS: 600_000,
+  PRESENCE_TIMEOUT_MS: 12_000,
 } as const;
+
+export const AVATARS = ['🪨', '📄', '✂️', '🐉', '🦊', '🐼', '👾', '🥋', '🍜', '⚡'] as const;
+
+export const ROOM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
