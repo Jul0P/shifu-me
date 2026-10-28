@@ -6,24 +6,15 @@
       "persistent": true
     },
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"]
+    },
+    "@shifu/api#build": {
+      "outputs": []
     },
     "typecheck": {
-      "dependsOn": [
-        "^build"
-      ]
-    },
-    "test": {
-      "cache": false
-    },
-    "test:watch": {
-      "cache": false,
-      "persistent": true
+      "dependsOn": ["^build"]
     }
   }
 }

@@ -8,14 +8,15 @@
   },
   "scripts": {
     "dev": "turbo dev",
-    "build": "turbo build",
+    "build": "turbo build && pnpm --filter @shifu/shared typecheck",
     "typecheck": "turbo typecheck",
-    "test": "turbo test",
-    "test:watch": "turbo test:watch",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "check": "pnpm lint && pnpm build && pnpm typecheck && pnpm test"
+    "test": "pnpm test:api && pnpm test:web",
+    "test:api": "pnpm --filter @shifu/api test",
+    "test:web": "pnpm --filter @shifu/web test",
+    "check": "pnpm lint && pnpm build && pnpm test"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.3",

@@ -1,46 +1,25 @@
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
-import type * as React from 'react';
+import type { ComponentProps } from 'react';
 import { cn } from '@/lib/utils';
 
-const buttonVariants = cva('inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition-colors disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black', {
+const buttonVariants = cva('arcade-button inline-flex min-h-11 items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-center disabled:opacity-45', {
   variants: {
     variant: {
-      default: 'bg-[#34D399] text-black hover:bg-[#22b87f]',
-      outline: 'border-2 border-black bg-white hover:bg-neutral-100',
-      destructive: 'bg-[#FB7185] text-black',
-      ghost: 'hover:bg-black/10',
+      default: 'bg-mint hover:bg-emerald-300',
+      outline: 'bg-white hover:bg-neutral-50',
+      destructive: 'bg-coral hover:bg-rose-300',
+      yellow: 'bg-cyber hover:bg-yellow-200',
     },
-    size: {
-      default: 'h-10',
-      sm: 'h-9 px-3',
-      lg: 'h-12 px-6',
-    },
+    size: { default: '', sm: 'min-h-11 px-3 text-xs', lg: 'min-h-14 px-6 py-3 text-base' },
   },
-  defaultVariants: {
-    variant: 'default',
-    size: 'default',
-  },
+  defaultVariants: { variant: 'default', size: 'default' },
 });
-export type ButtonProps = React.ComponentProps<'button'> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  };
-function Button({ className, variant, size, asChild = false, ...props }: ButtonProps) {
-  const Comp = asChild ? Slot : 'button';
-  return (
-    <Comp
-      data-slot="button"
-      className={cn(
-        buttonVariants({
-          variant,
-          size,
-        }),
-        className,
-      )}
-      {...props}
-    />
-  );
-}
 
-export { Button, buttonVariants };
+type ButtonProps = ComponentProps<'button'> & VariantProps<typeof buttonVariants> & { asChild?: boolean };
+
+export function Button({ className, variant, size, asChild = false, type = 'button', ...props }: ButtonProps) {
+  const Component = asChild ? Slot : 'button';
+
+  return <Component type={asChild ? undefined : type} className={cn(buttonVariants({ variant, size }), className)} {...props} />;
+}

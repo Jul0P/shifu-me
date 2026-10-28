@@ -1,14 +1,13 @@
+import { objectIdSchema } from '@shifu/shared';
 import { createFileRoute } from '@tanstack/react-router';
-import { Card } from '@/components/ui/card';
-export const Route = createFileRoute('/game/$gameId')({
-  component: Game,
-});
-function Game() {
+import { Feedback } from '@/components/ui/feedback';
+import { RequireAuth } from '@/features/auth/require-auth';
+import { GamePage } from '@/features/game/game-page';
+
+export const Route = createFileRoute('/game/$gameId')({ component: Page });
+
+function Page() {
   const { gameId } = Route.useParams();
-  return (
-    <main className="mx-auto max-w-3xl px-5 py-8">
-      <h1 className="mb-6 text-4xl font-black">PARTIE {gameId}</h1>
-      <Card>À développer : chrono serveur 10 secondes, coups privés, BO5 et polling de la manche.</Card>
-    </main>
-  );
+
+  return <RequireAuth>{objectIdSchema.safeParse(gameId).success ? <GamePage key={gameId} gameId={gameId} /> : <Feedback title="Partie introuvable" message="Ce lien de partie est invalide." />}</RequireAuth>;
 }

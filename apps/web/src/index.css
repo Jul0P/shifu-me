@@ -1,45 +1,132 @@
 @import "tailwindcss";
 
+@theme {
+  --color-cyber: #ffe600;
+  --color-mint: #34d399;
+  --color-coral: #fb7185;
+  --font-display: "Archivo Black", "Arial Black", sans-serif;
+}
+
 :root {
-  font-family: "Arial Black", "Segoe UI", system-ui, sans-serif;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
   color: #000;
   background: #ffe600;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
+
 * {
   box-sizing: border-box;
 }
+
 body {
   margin: 0;
   min-width: 320px;
 }
 button,
-input {
-  font: inherit;
+a,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+button:not(:disabled),
+summary {
+  cursor: pointer;
 }
 a {
   color: inherit;
 }
+button:disabled {
+  cursor: not-allowed;
+}
+::selection {
+  background: #34d399;
+  color: #000;
+}
+:focus-visible {
+  outline: 3px solid #000;
+  outline-offset: 4px;
+}
+
+main:focus {
+  outline: none;
+}
+
+.title {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
 .arcade-card {
-  background: #fff;
   border: 3px solid #000;
   border-radius: 14px;
-  box-shadow: 5px 5px 0 #000;
+  box-shadow: 4px 4px 0 #000;
+}
+.arcade-chip {
+  border: 3px solid #000;
+  border-radius: 8px;
+  box-shadow: 3px 3px 0 #000;
 }
 .arcade-button {
   border: 3px solid #000;
+  border-radius: 10px;
   box-shadow: 4px 4px 0 #000;
   transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease;
+    transform 0.08s ease,
+    box-shadow 0.08s ease,
+    background-color 0.12s ease;
 }
-.arcade-button:active {
-  transform: translate(3px, 3px);
-  box-shadow: 1px 1px 0 #000;
+.arcade-button:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 #000;
 }
+.arcade-button:active:not(:disabled),
+.arcade-button[aria-pressed="true"] {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+.arcade-button[aria-pressed="true"] {
+  background: #34d399;
+}
+
+dialog {
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+}
+dialog::backdrop {
+  background: rgb(0 0 0 / 65%);
+}
+.pop {
+  animation: pop 0.3s ease-out;
+}
+.search-pulse {
+  animation: search-pulse 1.5s ease-in-out infinite;
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes search-pulse {
+  50% {
+    transform: rotate(8deg) scale(1.05);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  * {
-    transition-duration: 0ms !important;
+  .pop,
+  .search-pulse {
+    animation: none;
+  }
+  .arcade-button {
+    transition: none;
+  }
+  .arcade-button:hover:not(:disabled),
+  .arcade-button:active:not(:disabled),
+  .arcade-button[aria-pressed="true"] {
+    transform: none;
   }
 }

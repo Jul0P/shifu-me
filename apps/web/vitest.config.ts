@@ -1,0 +1,14 @@
+import { fileURLToPath } from 'node:url';
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
+  test: {
+    environment: 'node',
+    env: { VITE_API_URL: 'http://localhost:3000' },
+    include: ['tests/unit/**/*.test.{ts,tsx}'],
+    setupFiles: ['tests/setup.ts'],
+    restoreMocks: true,
+    unstubGlobals: true,
+  },
+});
