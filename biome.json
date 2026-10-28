@@ -5,17 +5,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": [
-      "**",
-      "!**/node_modules",
-      "!**/dist",
-      "!**/build",
-      "!**/.turbo",
-      "!**/coverage",
-      "!**/.vercel",
-      "!**/routeTree.gen.ts",
-      "!**/pnpm-lock.yaml"
-    ]
+    "includes": ["**", "!**/build", "!**/routeTree.gen.ts", "!**/pnpm-lock.yaml"]
   },
   "formatter": {
     "enabled": true,
@@ -23,8 +13,7 @@
     "indentWidth": 2,
     "lineWidth": 320,
     "lineEnding": "lf",
-    "attributePosition": "multiline",
-    "expand": "always"
+    "expand": "auto"
   },
   "javascript": {
     "formatter": {
@@ -40,6 +29,7 @@
       "preset": "recommended"
     }
   },
+  "css": { "parser": { "tailwindDirectives": true } },
   "assist": {
     "enabled": true,
     "actions": {
