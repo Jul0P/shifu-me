@@ -22,6 +22,24 @@ jobs:
         run: pnpm lint
       - name: Build et vérification TypeScript des trois packages
         run: pnpm build
+      - name: Vérifier le démarrage du bundle API Vercel sans MongoDB
+        working-directory: apps/api
+        run: |
+          pnpm build:vercel
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { once } from 'node:events';
+          import app from './dist/index.js';
+          const server = app.listen(0, '127.0.0.1');
+          try {
+            await once(server, 'listening');
+            const response = await fetch(`http://127.0.0.1:${server.address().port}/api/health`);
+            assert.equal(response.status, 200);
+            assert.deepEqual(await response.json(), { status: 'ok' });
+          } finally {
+            await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+          }
+          NODE
       - name: Installer Chromium pour les tests frontend
         run: pnpm --filter @shifu/web exec playwright install --with-deps chromium
       - name: Tests API et frontend sans MongoDB
